@@ -77,10 +77,10 @@ export function SettingsPanel({
           A3
         </button>
         <button
-          className={`seg ${settings.paperPreset === "a4" ? "active" : ""}`}
-          onClick={() => setPreset("a4")}
+          className={`seg ${settings.paperPreset === "letter" ? "active" : ""}`}
+          onClick={() => setPreset("letter")}
         >
-          A4
+          8.5 × 11 in (US Letter)
         </button>
       </div>
 
