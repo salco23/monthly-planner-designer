@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PlannerPage } from "@/components/PlannerPage";
-import { DEFAULT_TEMPLATES, type PlannerSettings } from "@/lib/settings";
+import { DEFAULT_TEMPLATES, normalizePaperPreset, type PlannerSettings } from "@/lib/settings";
 import { decodeSettings } from "@/lib/codec";
 import { readStoredPlannerState } from "@/lib/storage";
 
@@ -25,17 +25,17 @@ export default function PrintPage() {
   useEffect(() => {
     const decoded = decodeSettings(encoded);
     if (decoded) {
-      setSettings(decoded);
+      setSettings(normalizePaperPreset(decoded));
       return;
     }
 
     const stored = readStoredPlannerState();
     if (stored) {
-      setSettings(stored.settings);
+      setSettings(normalizePaperPreset(stored.settings));
       return;
     }
 
-    setSettings(DEFAULT_TEMPLATES.a4);
+    setSettings(DEFAULT_TEMPLATES.letter);
   }, [encoded]);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function PrintPage() {
     requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
   }, [year, monthsToRender, settings]);
 
-  const activeSettings = settings ?? DEFAULT_TEMPLATES.a4;
+  const activeSettings = settings ?? DEFAULT_TEMPLATES.letter;
   return (
     <div style={{ background: "white" }}>
       {monthsToRender.map((m, idx) => (

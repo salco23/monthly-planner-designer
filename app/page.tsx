@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlannerPage } from "@/components/PlannerPage";
 import { SettingsPanel } from "@/components/SettingsPanel";
-import { DEFAULT_TEMPLATES, type PlannerSettings } from "@/lib/settings";
+import { DEFAULT_TEMPLATES, normalizePaperPreset, type PlannerSettings } from "@/lib/settings";
 import { encodeSettings } from "@/lib/codec";
 import { persistStoredPlannerState, readStoredPlannerState } from "@/lib/storage";
 
@@ -16,16 +16,14 @@ export default function Page() {
   const [year, setYear] = useState<number>(now.getFullYear());
   const [month, setMonth] = useState<number>(now.getMonth() + 1); // 1-12
 
-  const [settings, setSettings] = useState<PlannerSettings>(
-    DEFAULT_TEMPLATES.a4
-  );
+  const [settings, setSettings] = useState<PlannerSettings>(DEFAULT_TEMPLATES.letter);
 
   useEffect(() => {
     const stored = readStoredPlannerState();
     if (stored) {
       setYear(stored.year);
       setMonth(stored.month);
-      setSettings(stored.settings);
+      setSettings(normalizePaperPreset(stored.settings));
     }
   }, []);
 
@@ -36,7 +34,7 @@ export default function Page() {
   const pageSizeLabel = useMemo(() => {
     const map: Record<string, string> = {
       a3: "A3 (297×420mm)",
-      a4: "A4 (210×297mm)",
+      letter: "US Letter (8.5×11 in)",
     };
     return map[settings.paperPreset] ?? settings.paperPreset;
   }, [settings.paperPreset]);
@@ -86,8 +84,9 @@ export default function Page() {
             onClick={() => {
               const s = encodeSettings(settings);
               const url = `/print?y=${year}&m=${month}&s=${encodeURIComponent(s)}`;
-              const w = window.open(url, "_blank", "noopener,noreferrer");
-              if (!w) window.location.href = url; // fallback if popups blocked
+              const w = window.open(url, "_blank");
+              if (w) w.opener = null;
+              else window.location.assign(url); // fallback if popups blocked
             }}
             title="Opens a print-ready page with your current settings."
           >
@@ -99,8 +98,9 @@ export default function Page() {
             onClick={() => {
               const s = encodeSettings(settings);
               const url = `/print?y=${year}&s=${encodeURIComponent(s)}&mode=year`;
-              const w = window.open(url, "_blank", "noopener,noreferrer");
-              if (!w) window.location.href = url;
+              const w = window.open(url, "_blank");
+              if (w) w.opener = null;
+              else window.location.assign(url);
             }}
             title="Generate a print-ready file for all 12 months of the selected year."
           >

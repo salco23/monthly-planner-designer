@@ -1,4 +1,4 @@
-export type PaperPreset = "a3" | "a4";
+export type PaperPreset = "a3" | "letter" | "a4";
 
 export type PlannerColumn = {
   id: string;
@@ -50,6 +50,44 @@ function uid(prefix: string) {
   return prefix + "-" + Math.random().toString(16).slice(2);
 }
 
+const LETTER_WIDTH_MM = 215.9;
+const LETTER_HEIGHT_MM = 279.4;
+
+const LETTER_TEMPLATE: PlannerSettings = {
+  paperPreset: "letter",
+  pageWidthMm: LETTER_WIDTH_MM,
+  pageHeightMm: LETTER_HEIGHT_MM,
+  marginTopMm: 14,
+  marginRightMm: 10,
+  marginBottomMm: 10,
+  marginLeftMm: 10,
+
+  headerYearSizePt: 14,
+  headerMonthSizePt: 22,
+  headerTopGapMm: 5,
+
+  showMiniCalendars: true,
+  weekStartsOnMonday: true,
+  miniCalendarFontPt: 7,
+
+  rowHeightMm: 7.7,
+  dayColWidthMm: 22,
+  dayColWeekdayWidthMm: 14,
+  lineWeightPt: 0.55,
+
+  columns: [
+    { id: uid("col"), label: "Notes", widthMm: 52 },
+    { id: uid("col"), label: "Meals", widthMm: 40 },
+    { id: uid("col"), label: "Workout", widthMm: 32 },
+    { id: uid("col"), label: "To-dos", widthMm: 40 },
+  ],
+
+  fontFamily: "sans",
+  bodyFontPt: 8.5,
+
+  weekendTextStyle: "red",
+};
+
 export const DEFAULT_TEMPLATES: Record<PaperPreset, PlannerSettings> = {
   a3: {
     paperPreset: "a3",
@@ -87,45 +125,30 @@ export const DEFAULT_TEMPLATES: Record<PaperPreset, PlannerSettings> = {
     weekendTextStyle: "red",
   },
 
+  letter: LETTER_TEMPLATE,
+
+  // Legacy alias to keep previously saved or encoded settings working while using Letter sizing.
   a4: {
-    paperPreset: "a4",
-    pageWidthMm: 210,
-    pageHeightMm: 297,
-    marginTopMm: 14,
-    marginRightMm: 10,
-    marginBottomMm: 10,
-    marginLeftMm: 10,
-
-    headerYearSizePt: 14,
-    headerMonthSizePt: 22,
-    headerTopGapMm: 5,
-
-    showMiniCalendars: true,
-    weekStartsOnMonday: true,
-    miniCalendarFontPt: 7,
-
-    rowHeightMm: 7.7,
-    dayColWidthMm: 22,
-    dayColWeekdayWidthMm: 14,
-    lineWeightPt: 0.55,
-
-    columns: [
-      { id: uid("col"), label: "Notes", widthMm: 52 },
-      { id: uid("col"), label: "Meals", widthMm: 40 },
-      { id: uid("col"), label: "Workout", widthMm: 32 },
-      { id: uid("col"), label: "To-dos", widthMm: 40 },
-    ],
-
-    fontFamily: "sans",
-    bodyFontPt: 8.5,
-
-    weekendTextStyle: "red",
+    ...LETTER_TEMPLATE,
   },
 };
 
 export function withPaperPreset(preset: PaperPreset): PlannerSettings {
   // Deep clone so UI edits don't mutate the template object
   return JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[preset])) as PlannerSettings;
+}
+
+export function normalizePaperPreset(settings: PlannerSettings): PlannerSettings {
+  if (settings.paperPreset === "a4") {
+    return {
+      ...settings,
+      paperPreset: "letter",
+      pageWidthMm: LETTER_WIDTH_MM,
+      pageHeightMm: LETTER_HEIGHT_MM,
+    };
+  }
+
+  return settings;
 }
 
 export function ensurePositive(n: number, fallback: number) {
