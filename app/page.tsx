@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PlannerPage } from "@/components/PlannerPage";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { DEFAULT_TEMPLATES, type PlannerSettings } from "@/lib/settings";
 import { encodeSettings } from "@/lib/codec";
+import { persistStoredPlannerState, readStoredPlannerState } from "@/lib/storage";
 
 function clamp(n: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, n));
@@ -18,6 +19,19 @@ export default function Page() {
   const [settings, setSettings] = useState<PlannerSettings>(
     DEFAULT_TEMPLATES.a4
   );
+
+  useEffect(() => {
+    const stored = readStoredPlannerState();
+    if (stored) {
+      setYear(stored.year);
+      setMonth(stored.month);
+      setSettings(stored.settings);
+    }
+  }, []);
+
+  useEffect(() => {
+    persistStoredPlannerState({ settings, year, month });
+  }, [settings, year, month]);
 
   const pageSizeLabel = useMemo(() => {
     const map: Record<string, string> = {
@@ -78,6 +92,19 @@ export default function Page() {
             title="Opens a print-ready page with your current settings."
           >
             Print / Save PDF
+          </button>
+
+          <button
+            className="btn"
+            onClick={() => {
+              const s = encodeSettings(settings);
+              const url = `/print?y=${year}&s=${encodeURIComponent(s)}&mode=year`;
+              const w = window.open(url, "_blank", "noopener,noreferrer");
+              if (!w) window.location.href = url;
+            }}
+            title="Generate a print-ready file for all 12 months of the selected year."
+          >
+            Print full year
           </button>
 
         </div>
