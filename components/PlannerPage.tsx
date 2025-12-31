@@ -298,9 +298,6 @@ export function PlannerPage({
             border: none !important;
             border-radius: 0 !important;
           }
-          .plannerInner {
-            padding: 0 !important; /* margins come from @page rule */
-          }
         }
       `}</style>
     </div>
@@ -346,7 +343,7 @@ function MiniMonth({
         {weeks.flat().map((cell, i) => (
           <div
             key={i}
-            className={`miniCell ${cell.isToday ? "today" : ""} ${cell.isWeekend ? "wknd" : ""}`}
+            className={`miniCell ${cell.isWeekend ? "wknd" : ""}`}
           >
             {cell.day ?? ""}
           </div>
@@ -387,9 +384,6 @@ function MiniMonth({
         }
         .miniCell.wknd {
           color: ${settings.weekendTextStyle === "red" ? "#b01818" : "rgba(17,17,17,0.75)"};
-        }
-        .miniCell.today {
-          outline: 1px solid rgba(17, 17, 17, 0.55);
         }
       `}</style>
     </div>

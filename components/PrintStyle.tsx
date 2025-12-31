@@ -13,7 +13,8 @@ export function PrintStyle({ settings }: { settings: PlannerSettings }) {
 @media print {
   @page {
     size: ${settings.pageWidthMm}mm ${settings.pageHeightMm}mm;
-    margin: ${mm(settings.marginTopMm)} ${mm(settings.marginRightMm)} ${mm(settings.marginBottomMm)} ${mm(settings.marginLeftMm)};
+    /* Keep the printable area aligned with the on-screen layout padding. */
+    margin: 0;
   }
 }
   `.trim();
